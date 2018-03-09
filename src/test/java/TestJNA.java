@@ -6,6 +6,12 @@ import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinUser;
 import org.junit.Test;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.KeyEvent;
 import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -124,4 +130,80 @@ public class TestJNA {
         WinDef.HWND browser = Win32Util.findHandleByClassName(browserClassName, 10, TimeUnit.SECONDS);
         return Win32Util.findHandleByClassName(browser, alieditClassName, 10, TimeUnit.SECONDS);
     }
+
+
+    /**
+     * // 移动鼠标到坐标（x,y)处，并点击左键
+     * myRobot.mouseMove(x, y);                // 移动鼠标到坐标（x,y）处
+     * myRobot.mousePress(KeyEvent.BUTTON1_DOWN_MASK);     // 模拟按下鼠标左键
+     * myRobot.mouseRelease(KeyEvent.BUTTON1_DOWN_MASK);   // 模拟释放鼠标左键
+     * <p>
+     * // 打出一个大写的Q
+     * myRobot.keyPress(KeyEvent.VK_SHIFT);    // 模拟键盘按下shift键
+     * myRobot.keyPress(KeyEvent.VK_Q);        // 模拟键盘按下Q键（小写）
+     * myRobot.keyRelease(KeyEvent.VK_Q);      // 模拟键盘释放Q键
+     * myRobot.keyRelease(KeyEvent.VK_SHIFT);  // 模拟键盘释放shift键
+     * <p>
+     * // 设置每次输入的延迟为200ms
+     * myRobot.setAutoDelay(200);
+     */
+    @Test
+    public void test3() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = (int) screenSize.getWidth();
+        int height = (int) screenSize.getHeight();
+
+        try {
+            Robot myRobot = new Robot();
+            myRobot.mouseMove(width - 30, height - 30);
+
+            myRobot.mousePress(KeyEvent.BUTTON1_DOWN_MASK);
+            myRobot.setAutoDelay(200);
+            myRobot.mouseRelease(KeyEvent.BUTTON1_DOWN_MASK);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void test4() {
+        setSysClipboardText("写入粘贴版");
+
+        // 获取粘贴版信息
+        System.out.println("获取粘贴版: " + getSysClipboardText());
+    }
+
+
+    /**
+     * 1. 从剪切板获得文字。
+     */
+    public static String getSysClipboardText() {
+        String ret = "";
+        Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
+        // 获取剪切板中的内容
+        Transferable clipTf = sysClip.getContents(null);
+        if (clipTf != null) {
+            // 检查内容是否是文本类型
+            if (clipTf.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                try {
+                    ret = (String) clipTf
+                            .getTransferData(DataFlavor.stringFlavor);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    /**
+     * 2.将字符串复制到剪切板。
+     */
+    public static void setSysClipboardText(String writeMe) {
+        Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+        Transferable tText = new StringSelection(writeMe);
+        clip.setContents(tText, null);
+    }
+
 }

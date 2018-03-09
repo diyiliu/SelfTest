@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="myProject" basedir="." default="package">
+    <property name="compile" value="compile"/>
+    <property name="dist" value="dist"/>
+
+    <target name="init"/>
+
+    <target name="process">
+        <mkdir dir="${compile}"/>
+        <mkdir dir="${dist}"/>
+    </target>
+
+    <target name="package" depends="init, process"/>
+
+    <target name="myCompile" depends="package">
+        <javac srcdir="src" destdir="${compile}"/>
+    </target>
+
+    <target name="dist" depends="myCompile">
+        <tstamp/>
+        <jar basedir="${compile}" destfile="${dist}/package-${DSTAMP}.jar">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+                <attribute name="Main-Class" value="com.diyiliu.Test1"/>
+            </manifest>
+        </jar>
+    </target>
+</project>
